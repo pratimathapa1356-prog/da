@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#172554">
+<title>Guess the Flag — Country Clue Challenge</title>
+<style>
+  :root{--navy:#9d174d;--blue:#ec4899;--sky:#fce7f3;--cream:#fff8fc;--ink:#4a2440;--muted:#9d718d;--green:#15803d;--red:#be123c;--gold:#f59e0b}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:
+    radial-gradient(ellipse at 8% 12%,#ffd5e7 0 7%,transparent 7.3%),
+    radial-gradient(ellipse at 92% 24%,#ffe0ed 0 8%,transparent 8.3%),
+    radial-gradient(ellipse at 12% 88%,#ffe2ef 0 10%,transparent 10.3%),
+    radial-gradient(ellipse at 92% 88%,#ffd9e9 0 9%,transparent 9.3%),
+    linear-gradient(145deg,#fff0f7 0%,#fff9fc 48%,#ffe6f0 100%);
+    color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:24px 14px 36px;position:relative;overflow-x:hidden}
+  body::before,body::after{position:fixed;z-index:0;pointer-events:none;font-size:clamp(2.8rem,7vw,5.5rem);opacity:.42;line-height:1;filter:drop-shadow(0 5px 4px #be185d18)}
+  body::before{content:"🌸  ✿";left:1%;top:20%;transform:rotate(-14deg)}
+  body::after{content:"✿  🌷";right:1%;bottom:7%;transform:rotate(13deg)}
+  .app{position:relative;z-index:1}
+  .app{max-width:760px;margin:0 auto}
+  header{text-align:center;padding:12px 8px 22px}
+  .eyebrow{display:inline-block;background:#fce7f3;color:#be185d;border-radius:999px;padding:6px 12px;font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+  h1{font-size:clamp(2.1rem,7vw,3.6rem);line-height:1.04;letter-spacing:-.055em;margin:14px 0 10px;color:var(--navy)}
+  .subtitle{color:#9d557a;max-width:520px;margin:0 auto;line-height:1.6}
+  .panel{background:rgba(255,255,255,.94);border:1px solid #f9c5dc;border-radius:24px;box-shadow:0 18px 45px #be185d12;padding:clamp(18px,4vw,30px)}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+  .stat{background:#fff6fa;border:1px solid #f9d4e4;border-radius:16px;padding:12px;text-align:center}
+  .stat-label{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .stat-value{font-size:clamp(1.25rem,4vw,1.8rem);font-weight:850;color:var(--navy);margin-top:3px;font-variant-numeric:tabular-nums}
+  #timer.warning .stat-value{color:var(--red);animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.55}}
+  .progress-row{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:.85rem;font-weight:650;margin-bottom:8px}
+  .track{height:8px;border-radius:99px;background:#fce7f3;overflow:hidden;margin-bottom:24px}
+  #progress{height:100%;width:0;background:linear-gradient(90deg,#f472b6,#fb7185);transition:width .25s}
+  .clue-card{background:linear-gradient(135deg,#fff0f7,#fffafd);border:1px solid #f9b8d4;border-radius:20px;padding:clamp(20px,5vw,30px);margin-bottom:18px}
+  .clue-label{font-size:.78rem;color:#be185d;text-transform:uppercase;letter-spacing:.1em;font-weight:850}
+  h2{font-size:clamp(1.3rem,4vw,1.75rem);margin:8px 0 12px;color:var(--navy)}
+  #clueText{font-size:1.08rem;line-height:1.75;margin:0}
+  #hintText{margin-top:14px;padding:12px 14px;background:#fff0c9;border-radius:12px;color:#9a5b18;line-height:1.5}
+  [hidden]{display:none!important}
+  label{display:block;font-weight:750;margin-bottom:8px}
+  .answer-row{display:flex;gap:10px}
+  input{min-width:0;flex:1;border:2px solid #f3bfd5;border-radius:14px;padding:14px 15px;font:inherit;font-size:1rem;outline:none;background:white}
+  input:focus{border-color:var(--blue);box-shadow:0 0 0 4px #2563eb20}
+  button{border:0;border-radius:14px;padding:13px 18px;font:inherit;font-weight:800;cursor:pointer;transition:transform .15s,filter .15s}
+  button:hover{filter:brightness(1.04);transform:translateY(-1px)}
+  button:focus-visible{outline:3px solid #f9a8d4;outline-offset:3px}
+  button:disabled,input:disabled{opacity:.55;cursor:not-allowed;transform:none}
+  .primary{background:var(--blue);color:white}
+  .secondary{background:#e2e8f0;color:#1e293b}
+  .hint-btn{background:#fef3c7;color:#92400e}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .actions button{flex:1}
+  #feedback{min-height:28px;margin:16px 2px 0;font-weight:750;line-height:1.5}
+  #feedback.good{color:var(--green)} #feedback.bad{color:var(--red)} #feedback.info{color:#475569}
+  .fact{margin-top:10px;padding:13px 15px;border-radius:14px;background:#fff0f6;color:#9d174d;line-height:1.55}
+  .welcome{text-align:center;padding:12px 4px 8px}
+  .welcome-icon{width:70px;height:70px;display:grid;place-items:center;margin:0 auto 12px;background:#fce7f3;border-radius:22px;color:#db2777;font-size:2rem;font-weight:900}
+  .welcome p,.results p{color:#9d718d;line-height:1.7}
+  .welcome ul{text-align:left;max-width:420px;margin:18px auto 24px;line-height:1.9;color:#334155;padding-left:24px}
+  .big-button{width:100%;max-width:320px;font-size:1.05rem;padding:15px 20px}
+  .results{text-align:center;padding:12px 0}
+  .result-score{font-size:clamp(3rem,12vw,5rem);font-weight:900;letter-spacing:-.06em;color:var(--navy);line-height:1.1;margin:12px 0}
+  .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0}
+  .result-tile{background:#fff6fa;border:1px solid #f9d4e4;border-radius:15px;padding:14px 8px}
+  .result-tile strong{display:block;font-size:1.4rem;color:var(--navy)}
+  .result-tile span{font-size:.8rem;color:var(--muted)}
+  .new-best{color:#a16207;font-weight:850}
+  footer{text-align:center;color:#64748b;font-size:.8rem;margin-top:18px;line-height:1.6}
+  @media(max-width:520px){body{padding:14px 10px 24px}.stats{gap:7px}.stat{padding:10px 5px}.answer-row{flex-direction:column}.answer-row button{width:100%}.panel{border-radius:20px}.result-grid{gap:7px}.result-tile{padding:12px 4px}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <span class="eyebrow">A text-only geography game</span>
+    <h1>Guess the Flag</h1>
+    <p class="subtitle">No flag pictures. Just clever clues, world knowledge, and 100 seconds on the clock.</p>
+  </header>
+  <main class="panel">
+    <section id="welcome" class="welcome">
+      <div class="welcome-icon" aria-hidden="true">?</div>
+      <h2>Ready for the Country Clue Challenge?</h2>
+      <p>Read each written clue and type the country you think it describes. Learn a new fact with every answer.</p>
+      <ul>
+        <li>⏱️ One round lasts <strong>100 seconds</strong>.</li>
+        <li>⭐ Earn <strong>10 points</strong> per correct answer, or <strong>5 with a hint</strong>.</li>
+        <li>💡 Hints are optional; wrong answers earn zero points.</li>
+        <li>🌍 Questions use only the 13 countries in this game.</li>
+      </ul>
+      <button id="startBtn" class="primary big-button">Start Game</button>
+    </section>
+
+    <section id="game" hidden>
+      <div class="stats">
+        <div class="stat" id="timer"><div class="stat-label">Time left</div><div class="stat-value"><span id="time">100</span>s</div></div>
+        <div class="stat"><div class="stat-label">Score</div><div class="stat-value" id="score">0</div></div>
+        <div class="stat"><div class="stat-label">Correct</div><div class="stat-value" id="correct">0</div></div>
+      </div>
+      <div class="progress-row"><span id="questionCount">Clue 1</span><span id="bestLabel">Best: 0</span></div>
+      <div class="track" role="progressbar" aria-label="Countries encountered" aria-valuemin="0" aria-valuemax="13" aria-valuenow="0" id="progressTrack"><div id="progress"></div></div>
+      <article class="clue-card">
+        <div class="clue-label">Read the clue</div>
+        <h2>Which country am I?</h2>
+        <p id="clueText"></p>
+        <div id="hintText" hidden></div>
+      </article>
+      <form id="answerForm">
+        <label for="answer">Your country answer</label>
+        <div class="answer-row">
+          <input id="answer" name="answer" type="text" placeholder="Type a country name…" autocomplete="off" autocapitalize="words" spellcheck="false" required>
+          <button id="submitBtn" class="primary" type="submit">Submit</button>
+        </div>
+      </form>
+      <div class="actions">
+        <button id="hintBtn" class="hint-btn" type="button">💡 Show Hint (5 points)</button>
+        <button id="skipBtn" class="secondary" type="button">Skip Clue</button>
+      </div>
+      <p id="feedback" role="status" aria-live="polite"></p>
+      <div id="fact" class="fact" hidden></div>
+      <div class="actions" id="nextActions" hidden>
+        <button id="nextBtn" class="primary" type="button">Next Clue →</button>
+      </div>
+    </section>
+
+    <section id="results" class="results" hidden>
+      <div class="welcome-icon" aria-hidden="true">🌎</div>
+      <h2 id="resultTitle">Round complete!</h2>
+      <p id="resultMessage">Here are your results.</p>
+      <div class="result-score"><span id="finalScore">0</span><span style="font-size:1.2rem;letter-spacing:0"> points</span></div>
+      <div class="result-grid">
+        <div class="result-tile"><strong id="finalCorrect">0</strong><span>Correct answers</span></div>
+        <div class="result-tile"><strong id="finalAttempted">0</strong><span>Answered</span></div>
+        <div class="result-tile"><strong id="finalAccuracy">0%</strong><span>Accuracy</span></div>
+      </div>
+      <p id="bestMessage"></p>
+      <button id="againBtn" class="primary big-button">Play Again</button>
+    </section>
+  </main>
+  <footer>Made for learning • No images, accounts, or personal data collection.<br>Your best score is saved only in this browser on this device.</footer>
+</div>
+<script>
+(() => {
+  "use strict";
+  const countries = [
+    {name:"Ivory Coast", aliases:["cote d ivoire","cote d'ivoire","côte d’ivoire","côte d'ivoire"], clue:"This West African country is one of the world's leading cocoa producers. Its largest city, Abidjan, is a major economic hub, while Yamoussoukro is its political capital.", hint:"Think of a West African country whose English name includes a colour and an animal.", fact:"Cocoa is a major export, and Yamoussoukro is known for the Basilica of Our Lady of Peace."},
+    {name:"Kazakhstan", aliases:[], clue:"The world's largest landlocked country stretches across Central Asia. Its landscape includes vast steppes, and its modern capital is Astana.", hint:"Its name ends in “-stan,” and the Baikonur Cosmodrome is located here.", fact:"The Baikonur Cosmodrome, leased by Russia, has played a major role in space exploration."},
+    {name:"Russia", aliases:["russian federation"], clue:"This enormous country spans eastern Europe and northern Asia. It is home to Lake Baikal, the world's deepest freshwater lake, and the famous Trans-Siberian Railway.", hint:"Moscow and Saint Petersburg are two of its best-known cities.", fact:"It is the largest country in the world by land area and spans 11 time zones."},
+    {name:"Turkey", aliases:["türkiye","turkiye"], clue:"This country sits across both Europe and Asia. Istanbul lies beside the Bosporus, and visitors often enjoy baklava, kebabs, and the historic Hagia Sophia.", hint:"Its capital is Ankara, and its name is also the English name of a bird.", fact:"The country officially adopted the name Türkiye for international use in 2022."},
+    {name:"India", aliases:[], clue:"The Taj Mahal stands in this South Asian country. Its cuisine includes dishes such as biryani and dosa, and the Ganges is one of its most important rivers.", hint:"New Delhi is its capital, and Bollywood is a major film industry.", fact:"The Taj Mahal in Agra was built in the 17th century as a mausoleum."},
+    {name:"Pakistan", aliases:[], clue:"This South Asian country is home to the world's second-highest mountain, K2. Its national language is Urdu, and the Indus River is central to its history and agriculture.", hint:"Islamabad is its capital; it shares a long border with India.", fact:"K2, in the Karakoram range, rises to 8,611 metres above sea level."},
+    {name:"Bangladesh", aliases:[], clue:"Located in South Asia, this river-delta country has a coastline along the Bay of Bengal. Its capital is Dhaka, and Bengali is its official language.", hint:"Its name begins with “Bangla,” and it is famous for the Sundarbans mangrove forest.", fact:"The Sundarbans, shared with India, form one of the world's largest mangrove forests."},
+    {name:"Uzbekistan", aliases:[], clue:"This Central Asian country was a key stop on the ancient Silk Road. The historic cities of Samarkand and Bukhara are famous for blue-tiled architecture.", hint:"Its capital is Tashkent, and its name ends in “-stan.”", fact:"Samarkand's Registan Square is celebrated for its grand Islamic architecture."},
+    {name:"Italy", aliases:[], clue:"This European country is shaped like a boot on the map. It is famous for pizza, pasta, the Colosseum, and the canals of Venice.", hint:"Rome is its capital, and Vatican City is surrounded by this country.", fact:"Italy has more UNESCO World Heritage Sites than any other country according to many recent counts."},
+    {name:"Germany", aliases:[], clue:"This central European country is known for its engineering, Oktoberfest, and the Brandenburg Gate in Berlin. The Rhine is one of its major rivers.", hint:"Its capital is Berlin, and its language is also called Deutsch.", fact:"The Berlin Wall fell in 1989, becoming a major symbol of the end of the Cold War."},
+    {name:"Nepal", aliases:[], clue:"This Himalayan country contains Mount Everest, the world's highest mountain above sea level. Its capital is Kathmandu, and Lumbini is traditionally regarded as the birthplace of Buddha.", hint:"It lies between India and China and has a non-rectangular national flag.", fact:"Eight of the world's fourteen mountains higher than 8,000 metres are in this country or along its borders."},
+    {name:"Sri Lanka", aliases:[], clue:"This island country lies in the Indian Ocean, just southeast of India. It is known for Ceylon tea, ancient Buddhist sites, and wildlife such as elephants.", hint:"Its capital is Sri Jayawardenepura Kotte, while Colombo is its largest city.", fact:"The island was widely known internationally as Ceylon until the country adopted its current name in 1972."},
+    {name:"Honduras", aliases:[], clue:"This Central American country has a Caribbean coastline and is home to the ancient Maya site of Copán. Spanish is its official language, and its capital area includes Tegucigalpa.", hint:"It borders Guatemala, El Salvador, and Nicaragua.", fact:"Copán is renowned for its Maya ruins and elaborately carved stone monuments."}
+  ];
+  const $ = id => document.getElementById(id);
+  const welcome = $("welcome"), game = $("game"), results = $("results");
+  let order = [], index = 0, score = 0, correct = 0, attempted = 0;
+  let timeLeft = 100, timerId = null, active = false, hintUsed = false, locked = false, roundBest = 0;
+  const BEST_KEY = "guessTheFlagCountryClueBest_v1";
+  function getBest(){ try { return Number(localStorage.getItem(BEST_KEY)) || 0; } catch(e) { return 0; } }
+  function setBest(value){ try { localStorage.setItem(BEST_KEY, String(value)); } catch(e) {} }
+  function normalize(s){
+    return s.toLocaleLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/&/g,"and").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
+  }
+  function shuffled(items){
+    const a = items.slice();
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+  function startGame(){
+    clearInterval(timerId);
+    order = shuffled(countries); index=0; score=0; correct=0; attempted=0; timeLeft=100; active=true; hintUsed=false; locked=false;
+    roundBest=getBest();
+    welcome.hidden=true; results.hidden=true; game.hidden=false;
+    $("score").textContent="0"; $("correct").textContent="0"; $("time").textContent="100";
+    $("timer").classList.remove("warning"); $("bestLabel").textContent="Best: "+roundBest;
+    $("feedback").textContent=""; $("feedback").className=""; $("fact").hidden=true;
+    loadQuestion();
+    timerId=setInterval(() => {
+      if(!active) return;
+      timeLeft--; $("time").textContent=String(timeLeft);
+      if(timeLeft<=15) $("timer").classList.add("warning");
+      if(timeLeft<=0) endGame();
+    },1000);
+  }
+  function loadQuestion(){
+    if(!active) return;
+    if(index>=order.length){ order=shuffled(countries); index=0; }
+    const c=order[index];
+    hintUsed=false; locked=false;
+    $("questionCount").textContent="Clue "+(attempted+1);
+    $("progress").style.width=(Math.min(attempted,13)/13*100)+"%";
+    $("progressTrack").setAttribute("aria-valuenow",String(Math.min(attempted,13)));
+    $("clueText").textContent=c.clue;
+    $("hintText").hidden=true; $("hintText").textContent="";
+    $("answer").value=""; $("answer").disabled=false; $("submitBtn").disabled=false;
+    $("hintBtn").disabled=false; $("skipBtn").disabled=false;
+    $("hintBtn").textContent="💡 Show Hint (5 points)";
+    $("nextActions").hidden=true; $("fact").hidden=true;
+    $("feedback").textContent=""; $("feedback").className="";
+    $("answer").focus({preventScroll:true});
+  }
+  function finishQuestion(message, kind, factText){
+    locked=true; attempted++;
+    $("answer").disabled=true; $("submitBtn").disabled=true; $("hintBtn").disabled=true; $("skipBtn").disabled=true;
+    $("feedback").textContent=message; $("feedback").className=kind;
+    if(factText){$("fact").textContent=factText;$("fact").hidden=false;}
+    $("nextActions").hidden=true;
+    $("score").textContent=String(score); $("correct").textContent=String(correct);
+    $("questionCount").textContent="Clue "+attempted+" completed";
+    $("progress").style.width=(Math.min(attempted,13)/13*100)+"%";
+    $("progressTrack").setAttribute("aria-valuenow",String(Math.min(attempted,13)));
+    // Automatically advance after a brief pause so the player can read the feedback and fact.
+    window.setTimeout(() => {
+      if(active && locked) nextQuestion();
+    }, 1600);
+  }
+  function submitAnswer(event){
+    event.preventDefault();
+    if(!active || locked) return;
+    const raw=$("answer").value;
+    if(!raw.trim()){ $("feedback").textContent="Type a country name first."; $("feedback").className="bad"; return; }
+    const c=order[index], answer=normalize(raw);
+    const accepted=[c.name,...c.aliases].some(n=>normalize(n)===answer);
+    if(accepted){
+      correct++; score+=hintUsed?5:10;
+      finishQuestion("Correct! "+c.name+" is the answer. +"+(hintUsed?5:10)+" points.","good","Did you know? "+c.fact);
+    } else {
+      finishQuestion("Not quite. The correct answer is "+c.name+".","bad","Did you know? "+c.fact);
+    }
+  }
+  function showHint(){
+    if(!active || locked || hintUsed) return;
+    hintUsed=true; $("hintText").textContent="Hint: "+order[index].hint; $("hintText").hidden=false;
+    $("hintBtn").disabled=true; $("hintBtn").textContent="Hint used · 5 points if correct";
+    $("feedback").textContent="Hint revealed. A correct answer is now worth 5 points."; $("feedback").className="info";
+  }
+  function skipQuestion(){
+    if(!active || locked) return;
+    const c=order[index];
+    finishQuestion("Clue skipped. No points awarded. The answer was "+c.name+".","info","Did you know? "+c.fact);
+  }
+  function nextQuestion(){
+    if(!active || !locked) return;
+    index++;
+    if(index>=order.length) order=shuffled(countries),index=0;
+    loadQuestion();
+  }
+  function endGame(){
+    if(!active) return;
+    active=false; clearInterval(timerId); timerId=null;
+    game.hidden=true; results.hidden=false;
+    $("finalScore").textContent=String(score);
+    $("finalCorrect").textContent=String(correct);
+    $("finalAttempted").textContent=String(attempted);
+    $("finalAccuracy").textContent=(attempted?Math.round(correct/attempted*100):0)+"%";
+    $("resultTitle").textContent=timeLeft<=0?"Time's up!":"Round complete!";
+    $("resultMessage").textContent="You explored country clues and earned "+score+" points.";
+    const oldBest=getBest();
+    if(score>oldBest){setBest(score);$("bestMessage").innerHTML='<span class="new-best">★ New personal best!</span>'; }
+    else $("bestMessage").textContent="Your best score on this device is "+Math.max(score,oldBest)+". Try again to beat it!";
+  }
+  $("startBtn").addEventListener("click",startGame);
+  $("answerForm").addEventListener("submit",submitAnswer);
+  $("hintBtn").addEventListener("click",showHint);
+  $("skipBtn").addEventListener("click",skipQuestion);
+  $("nextBtn").addEventListener("click",nextQuestion);
+  $("againBtn").addEventListener("click",startGame);
+})();
+</script>
+</body>
+</html>

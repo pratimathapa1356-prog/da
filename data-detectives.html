@@ -4,10 +4,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Detectives - CSV Analyzer</title>
+<title>Data Detectives - CSV and TSV Analyzer</title>
 
 <style>
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -30,7 +32,9 @@ header {
   margin-bottom: 20px;
 }
 
-header p { color: #d5dfef; }
+header p {
+  color: #d5dfef;
+}
 
 .panel {
   background: white;
@@ -73,7 +77,9 @@ input[type=file] {
   color: #2455a4;
 }
 
-.stat span { font-size: 13px; }
+.stat span {
+  font-size: 13px;
+}
 
 .table-wrap {
   overflow-x: auto;
@@ -102,14 +108,15 @@ th {
   font-size: 13px;
 }
 
-button {
-  background: #2455a4;
-  color: white;
-  border: 0;
-  padding: 11px 18px;
-  border-radius: 8px;
-}
+@media(max-width: 500px) {
+  body {
+    padding: 12px;
+  }
 
+  header, .panel {
+    padding: 16px;
+  }
+}
 </style>
 </head>
 
@@ -119,26 +126,37 @@ button {
 <header>
   <h1>🔎 Data Detectives</h1>
   <h2>Annual Resource Review</h2>
-  <p>CSV Upload and Data Explorer</p>
+  <p>CSV and TSV Data Analyzer</p>
 </header>
 
 <section class="panel">
   <h2>1. Upload Dataset</h2>
+
   <label class="upload">
-    <strong>Select a CSV file</strong>
-    <p class="note">Choose a CSV file from your device.</p>
-    <input type="file" id="csvFile" accept=".csv,text/csv">
+    <strong>Select a CSV or TSV file</strong>
+    <p class="note">
+      Supported formats: .csv and .tsv
+    </p>
+    <input
+      type="file"
+      id="dataFile"
+      accept=".csv,.tsv,text/csv,text/tab-separated-values">
   </label>
-  <p id="status" class="note">No dataset uploaded yet.</p>
+
+  <p id="status" class="note">
+    No dataset uploaded yet.
+  </p>
 </section>
 
 <section class="panel">
   <h2>2. Dataset Overview</h2>
+
   <div class="stats">
     <div class="stat">
       <strong id="rowCount">0</strong>
       <span>Data Records</span>
     </div>
+
     <div class="stat">
       <strong id="columnCount">0</strong>
       <span>Columns</span>
@@ -148,6 +166,7 @@ button {
 
 <section class="panel">
   <h2>3. Suggested Data Types</h2>
+
   <div class="table-wrap">
     <table>
       <thead>
@@ -157,8 +176,11 @@ button {
           <th>Missing Values</th>
         </tr>
       </thead>
+
       <tbody id="typeTable">
-        <tr><td colspan="3">Upload a CSV to begin.</td></tr>
+        <tr>
+          <td colspan="3">Upload a dataset to begin.</td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -166,9 +188,11 @@ button {
 
 <section class="panel">
   <h2>4. Dataset Preview</h2>
+
   <p class="note" id="previewNote">
     Your uploaded records will appear here.
   </p>
+
   <div class="table-wrap">
     <table>
       <thead id="previewHead"></thead>
@@ -180,9 +204,10 @@ button {
 </div>
 
 <script>
-const fileInput = document.getElementById("csvFile");
+const fileInput = document.getElementById("dataFile");
 
-function parseCSV(text) {
+// Read CSV or TSV data
+function parseDelimited(text, delimiter) {
   const rows = [];
   let row = [];
   let cell = "";
@@ -200,15 +225,23 @@ function parseCSV(text) {
       } else {
         quoted = !quoted;
       }
-    } else if (char === "," && !quoted) {
+    } else if (char === delimiter && !quoted) {
       row.push(cell);
       cell = "";
-    } else if ((char === "\n" || char === "\r") && !quoted) {
-      if (char === "\r" && text[i + 1] === "\n") i++;
+    } else if (
+      (char === "\n" || char === "\r") &&
+      !quoted
+    ) {
+      if (char === "\r" && text[i + 1] === "\n") {
+        i++;
+      }
+
       row.push(cell);
+
       if (row.some(value => value.trim() !== "")) {
         rows.push(row);
       }
+
       row = [];
       cell = "";
     } else {
@@ -217,6 +250,7 @@ function parseCSV(text) {
   }
 
   row.push(cell);
+
   if (row.some(value => value.trim() !== "")) {
     rows.push(row);
   }
@@ -224,54 +258,78 @@ function parseCSV(text) {
   return rows;
 }
 
+// Suggest a data type for each column
 function suggestType(values) {
-  const data = values.filter(v => v.trim() !== "");
+  const data = values.filter(
+    value => value.trim() !== ""
+  );
 
-  if (!data.length) return "Unknown";
+  if (data.length === 0) {
+    return "Unknown";
+  }
 
-  if (data.every(v => /^(true|false)$/i.test(v.trim()))) {
+  if (data.every(value =>
+    /^(true|false)$/i.test(value.trim())
+  )) {
     return "Boolean";
   }
 
-  if (data.every(v =>
-    /^[-+]?\d+(\.\d+)?$/.test(v.trim())
+  if (data.every(value =>
+    /^[-+]?\d+(\.\d+)?$/.test(value.trim())
   )) {
     return "Number";
   }
 
-  if (data.every(v => !isNaN(Date.parse(v)) &&
-    /[-/]/.test(v))) {
+  if (data.every(value =>
+    !isNaN(Date.parse(value.trim())) &&
+    /[-/]/.test(value.trim())
+  )) {
     return "Date";
   }
 
   return "Text";
 }
 
+// Upload and analyze dataset
 fileInput.addEventListener("change", async function() {
   const file = fileInput.files[0];
+
   if (!file) return;
 
-  if (!file.name.toLowerCase().endsWith(".csv")) {
+  const extension = file.name.toLowerCase();
+
+  if (!extension.endsWith(".csv") &&
+      !extension.endsWith(".tsv")) {
     document.getElementById("status").textContent =
-      "Please select a CSV file.";
+      "Please select a CSV or TSV file.";
     return;
   }
 
   try {
     const text = await file.text();
-    const rows = parseCSV(text);
+
+    // Detect delimiter from file extension
+    const delimiter = extension.endsWith(".tsv")
+      ? "\t"
+      : ",";
+
+    const rows = parseDelimited(text, delimiter);
 
     if (rows.length < 1) {
       throw new Error("The file is empty.");
     }
 
-    const headers = rows[0].map(h => h.trim());
-    const records = rows.slice(1).filter(row =>
-      row.some(value => value.trim() !== "")
+    const headers = rows[0].map(
+      header => header.trim()
     );
 
+    const records = rows.slice(1).filter(
+      row => row.some(value => value.trim() !== "")
+    );
+
+    // Dataset overview
     document.getElementById("status").textContent =
-      "Loaded: " + file.name;
+      "Successfully loaded: " + file.name;
 
     document.getElementById("rowCount").textContent =
       records.length.toLocaleString();
@@ -279,16 +337,26 @@ fileInput.addEventListener("change", async function() {
     document.getElementById("columnCount").textContent =
       headers.length;
 
+    // Suggested data types and missing values
     const typeTable = document.getElementById("typeTable");
     typeTable.innerHTML = "";
 
     headers.forEach((header, index) => {
-      const values = records.map(row => row[index] || "");
-      const missing = values.filter(v => v.trim() === "").length;
+      const values = records.map(
+        row => row[index] || ""
+      );
+
+      const missing = values.filter(
+        value => value.trim() === ""
+      ).length;
 
       const tr = document.createElement("tr");
 
-      [header, suggestType(values), missing].forEach(value => {
+      [
+        header,
+        suggestType(values),
+        missing
+      ].forEach(value => {
         const td = document.createElement("td");
         td.textContent = value;
         tr.appendChild(td);
@@ -297,8 +365,12 @@ fileInput.addEventListener("change", async function() {
       typeTable.appendChild(tr);
     });
 
-    const previewHead = document.getElementById("previewHead");
-    const previewBody = document.getElementById("previewBody");
+    // Preview first 100 records
+    const previewHead =
+      document.getElementById("previewHead");
+
+    const previewBody =
+      document.getElementById("previewBody");
 
     previewHead.innerHTML = "";
     previewBody.innerHTML = "";
@@ -326,7 +398,8 @@ fileInput.addEventListener("change", async function() {
     });
 
     document.getElementById("previewNote").textContent =
-      "Showing up to 100 of " + records.length +
+      "Showing up to 100 of " +
+      records.length +
       " records. All records were counted.";
 
   } catch (error) {
@@ -335,6 +408,6 @@ fileInput.addEventListener("change", async function() {
   }
 });
 </script>
+
 </body>
 </html>
-  

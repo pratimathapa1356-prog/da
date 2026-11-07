@@ -1,0 +1,340 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Detectives - CSV Analyzer</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background: #f2f5fa;
+  color: #243047;
+}
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+}
+
+header {
+  background: #172b4d;
+  color: white;
+  padding: 25px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+header p { color: #d5dfef; }
+
+.panel {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 8px #00000010;
+}
+
+.upload {
+  display: block;
+  padding: 20px;
+  border: 2px dashed #8295b5;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+}
+
+input[type=file] {
+  max-width: 100%;
+  margin-top: 12px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.stat {
+  background: #edf3fc;
+  padding: 18px;
+  border-radius: 10px;
+}
+
+.stat strong {
+  display: block;
+  font-size: 27px;
+  color: #2455a4;
+}
+
+.stat span { font-size: 13px; }
+
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 450px;
+}
+
+th, td {
+  padding: 11px;
+  border-bottom: 1px solid #e3e8f0;
+  text-align: left;
+  font-size: 13px;
+}
+
+th {
+  background: #edf3fc;
+}
+
+.note {
+  color: #66758b;
+  font-size: 13px;
+}
+
+button {
+  background: #2455a4;
+  color: white;
+  border: 0;
+  padding: 11px 18px;
+  border-radius: 8px;
+}
+
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+  <h1>🔎 Data Detectives</h1>
+  <h2>Annual Resource Review</h2>
+  <p>CSV Upload and Data Explorer</p>
+</header>
+
+<section class="panel">
+  <h2>1. Upload Dataset</h2>
+  <label class="upload">
+    <strong>Select a CSV file</strong>
+    <p class="note">Choose a CSV file from your device.</p>
+    <input type="file" id="csvFile" accept=".csv,text/csv">
+  </label>
+  <p id="status" class="note">No dataset uploaded yet.</p>
+</section>
+
+<section class="panel">
+  <h2>2. Dataset Overview</h2>
+  <div class="stats">
+    <div class="stat">
+      <strong id="rowCount">0</strong>
+      <span>Data Records</span>
+    </div>
+    <div class="stat">
+      <strong id="columnCount">0</strong>
+      <span>Columns</span>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>3. Suggested Data Types</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Column Name</th>
+          <th>Suggested Type</th>
+          <th>Missing Values</th>
+        </tr>
+      </thead>
+      <tbody id="typeTable">
+        <tr><td colspan="3">Upload a CSV to begin.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>4. Dataset Preview</h2>
+  <p class="note" id="previewNote">
+    Your uploaded records will appear here.
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead id="previewHead"></thead>
+      <tbody id="previewBody"></tbody>
+    </table>
+  </div>
+</section>
+
+</div>
+
+<script>
+const fileInput = document.getElementById("csvFile");
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+
+  text = text.replace(/^\uFEFF/, "");
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (char === '"') {
+      if (quoted && text[i + 1] === '"') {
+        cell += '"';
+        i++;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (char === "," && !quoted) {
+      row.push(cell);
+      cell = "";
+    } else if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && text[i + 1] === "\n") i++;
+      row.push(cell);
+      if (row.some(value => value.trim() !== "")) {
+        rows.push(row);
+      }
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+
+  row.push(cell);
+  if (row.some(value => value.trim() !== "")) {
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+function suggestType(values) {
+  const data = values.filter(v => v.trim() !== "");
+
+  if (!data.length) return "Unknown";
+
+  if (data.every(v => /^(true|false)$/i.test(v.trim()))) {
+    return "Boolean";
+  }
+
+  if (data.every(v =>
+    /^[-+]?\d+(\.\d+)?$/.test(v.trim())
+  )) {
+    return "Number";
+  }
+
+  if (data.every(v => !isNaN(Date.parse(v)) &&
+    /[-/]/.test(v))) {
+    return "Date";
+  }
+
+  return "Text";
+}
+
+fileInput.addEventListener("change", async function() {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  if (!file.name.toLowerCase().endsWith(".csv")) {
+    document.getElementById("status").textContent =
+      "Please select a CSV file.";
+    return;
+  }
+
+  try {
+    const text = await file.text();
+    const rows = parseCSV(text);
+
+    if (rows.length < 1) {
+      throw new Error("The file is empty.");
+    }
+
+    const headers = rows[0].map(h => h.trim());
+    const records = rows.slice(1).filter(row =>
+      row.some(value => value.trim() !== "")
+    );
+
+    document.getElementById("status").textContent =
+      "Loaded: " + file.name;
+
+    document.getElementById("rowCount").textContent =
+      records.length.toLocaleString();
+
+    document.getElementById("columnCount").textContent =
+      headers.length;
+
+    const typeTable = document.getElementById("typeTable");
+    typeTable.innerHTML = "";
+
+    headers.forEach((header, index) => {
+      const values = records.map(row => row[index] || "");
+      const missing = values.filter(v => v.trim() === "").length;
+
+      const tr = document.createElement("tr");
+
+      [header, suggestType(values), missing].forEach(value => {
+        const td = document.createElement("td");
+        td.textContent = value;
+        tr.appendChild(td);
+      });
+
+      typeTable.appendChild(tr);
+    });
+
+    const previewHead = document.getElementById("previewHead");
+    const previewBody = document.getElementById("previewBody");
+
+    previewHead.innerHTML = "";
+    previewBody.innerHTML = "";
+
+    const headerRow = document.createElement("tr");
+
+    headers.forEach(header => {
+      const th = document.createElement("th");
+      th.textContent = header;
+      headerRow.appendChild(th);
+    });
+
+    previewHead.appendChild(headerRow);
+
+    records.slice(0, 100).forEach(record => {
+      const tr = document.createElement("tr");
+
+      headers.forEach((_, index) => {
+        const td = document.createElement("td");
+        td.textContent = record[index] || "";
+        tr.appendChild(td);
+      });
+
+      previewBody.appendChild(tr);
+    });
+
+    document.getElementById("previewNote").textContent =
+      "Showing up to 100 of " + records.length +
+      " records. All records were counted.";
+
+  } catch (error) {
+    document.getElementById("status").textContent =
+      "Error reading file: " + error.message;
+  }
+});
+</script>
+</body>
+</html>
+  

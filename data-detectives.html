@@ -3,182 +3,150 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Detectives - CSV Analyzer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Detectives - Data Analyzer</title>
 <style>
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  padding: 18px;
-  font-family: Arial, sans-serif;
-  background: #f3f5fa;
-  color: #20243a;
-}
-.container {
-  max-width: 1100px;
-  margin: auto;
-}
-h1 { color: #343c78; }
-h2 { color: #343c78; margin-top: 28px; }
-.card {
-  background: white;
-  padding: 18px;
-  margin: 16px 0;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px #0000000c;
-}
-input, select, button {
-  width: 100%;
-  padding: 12px;
-  margin: 7px 0;
-  border: 1px solid #ccd1df;
-  border-radius: 7px;
-  font-size: 15px;
-}
-button {
-  background: #454f9b;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-button:hover { background: #303a80; }
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 10px;
-}
-.stat {
-  background: #eef0ff;
-  padding: 14px;
-  border-radius: 9px;
-}
-.stat strong {
-  display: block;
-  font-size: 23px;
-  color: #343c78;
-  margin-top: 5px;
-}
-.table-wrap {
-  overflow-x: auto;
-  width: 100%;
-}
-table {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 500px;
-  background: white;
-}
-th, td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
-  font-size: 13px;
-}
-th {
-  background: #454f9b;
-  color: white;
-}
-.note { color: #62677b; font-size: 13px; }
-.controls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 10px;
-}
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:#f3f5fa;color:#20243a;font-family:Arial,sans-serif}
+.container{max-width:1100px;margin:auto}
+h1,h2{color:#343c78}
+.card{background:white;padding:17px;margin:16px 0;border-radius:12px;box-shadow:0 2px 8px #0000000c}
+input,select,button{width:100%;padding:12px;margin:7px 0;border:1px solid #ccd1df;border-radius:7px;font-size:15px}
+button{background:#454f9b;color:white;border:0;cursor:pointer}
+.stats,.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.stat{background:#eef0ff;padding:13px;border-radius:9px}
+.stat strong{display:block;font-size:22px;color:#343c78;margin-top:5px}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:450px}
+th,td{border:1px solid #ddd;padding:9px;text-align:left;font-size:13px}
+th{background:#454f9b;color:white}
+.note{font-size:13px;color:#62677b}
+.result{padding:12px;background:#eef0ff;border-radius:8px;margin:8px 0}
+.warning{background:#fff1e8;padding:12px;border-radius:8px;margin:8px 0}
 </style>
 </head>
-
 <body>
 <div class="container">
 
 <h1>🚀 Data Detectives</h1>
-<p>CSV Data Analysis Tool — T1 and T2</p>
+<p>CSV Data Analysis Tool — T1, T2 and T3</p>
 
 <div class="card">
-  <h2>T1: Upload Your Dataset</h2>
-  <p>Select a CSV or TSV file from your device.</p>
-  <input type="file" id="fileInput" accept=".csv,.tsv,text/csv,text/tab-separated-values">
-  <p id="fileStatus" class="note">No file uploaded yet.</p>
+<h2>T1: Upload Dataset</h2>
+<p>Select a CSV or TSV file.</p>
+<input type="file" id="fileInput" accept=".csv,.tsv,text/csv,text/tab-separated-values">
+<p id="fileStatus" class="note">No file uploaded yet.</p>
 </div>
 
 <div id="analysisArea" style="display:none">
 
 <div class="card">
-  <h2>Dataset Overview</h2>
-  <div class="stats">
-    <div class="stat">Rows<strong id="rowCount">0</strong></div>
-    <div class="stat">Columns<strong id="columnCount">0</strong></div>
-    <div class="stat">Displayed<strong id="shownCount">0</strong></div>
-  </div>
+<h2>Dataset Overview</h2>
+<div class="stats">
+<div class="stat">Rows<strong id="rowCount">0</strong></div>
+<div class="stat">Columns<strong id="columnCount">0</strong></div>
+<div class="stat">Displayed<strong id="shownCount">0</strong></div>
+</div>
 </div>
 
 <div class="card">
-  <h2>Column Information</h2>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Column</th>
-          <th>Suggested Type</th>
-          <th>Missing Values</th>
-        </tr>
-      </thead>
-      <tbody id="columnInfo"></tbody>
-    </table>
-  </div>
+<h2>Column Information</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Column</th><th>Suggested Type</th><th>Missing Values</th></tr></thead>
+<tbody id="columnInfo"></tbody>
+</table>
+</div>
 </div>
 
 <div class="card">
-  <h2>T2: Search, Sort and Filter</h2>
+<h2>T2: Search, Sort and Filter</h2>
+<label>Search records</label>
+<input id="searchInput" placeholder="Search all columns...">
 
-  <label for="searchInput"><strong>1. Search records</strong></label>
-  <input id="searchInput" type="text"
-         placeholder="Type a word or value to search...">
-
-  <div class="controls">
-    <div>
-      <label for="sortColumn"><strong>2. Sort by column</strong></label>
-      <select id="sortColumn">
-        <option value="">Choose a column</option>
-      </select>
-    </div>
-
-    <div>
-      <label for="sortOrder"><strong>Sort order</strong></label>
-      <select id="sortOrder">
-        <option value="asc">Ascending (A–Z / smallest first)</option>
-        <option value="desc">Descending (Z–A / largest first)</option>
-      </select>
-    </div>
-
-    <div>
-      <label for="filterColumn"><strong>3. Filter column</strong></label>
-      <select id="filterColumn">
-        <option value="">Choose a column</option>
-      </select>
-    </div>
-
-    <div>
-      <label for="filterValue"><strong>Filter value</strong></label>
-      <select id="filterValue">
-        <option value="">All values</option>
-      </select>
-    </div>
-  </div>
-
-  <button id="resetButton" type="button">Reset Search, Sort and Filter</button>
-  <p class="note">Search works across all columns. Sorting and filtering can be used together.</p>
+<div class="controls">
+<div>
+<label>Sort by column</label>
+<select id="sortColumn"><option value="">Choose a column</option></select>
+</div>
+<div>
+<label>Sort order</label>
+<select id="sortOrder">
+<option value="asc">Ascending</option>
+<option value="desc">Descending</option>
+</select>
+</div>
+<div>
+<label>Filter column</label>
+<select id="filterColumn"><option value="">Choose a column</option></select>
+</div>
+<div>
+<label>Filter value</label>
+<select id="filterValue"><option value="">All values</option></select>
+</div>
+</div>
+<button id="resetButton">Reset Search, Sort and Filter</button>
 </div>
 
 <div class="card">
-  <h2>Dataset Records</h2>
-  <p id="resultMessage" class="note"></p>
-  <div class="table-wrap">
-    <table>
-      <thead id="previewHead"></thead>
-      <tbody id="previewBody"></tbody>
-    </table>
-  </div>
-  <p class="note">Showing up to 100 matching records.</p>
+<h2>T3: Data Quality Checks</h2>
+<p>Use these checks to find possible problems in your dataset.</p>
+<button id="runChecks">Run Data Quality Checks</button>
+
+<div class="stats">
+<div class="stat">Duplicate records<strong id="duplicateCount">—</strong></div>
+<div class="stat">Missing cells<strong id="missingCount">—</strong></div>
+<div class="stat">Invalid values<strong id="invalidCount">—</strong></div>
+<div class="stat">ID conflicts<strong id="conflictCount">—</strong></div>
+</div>
+
+<h3>1. Duplicate Records</h3>
+<p class="note">Finds complete rows that appear more than once.</p>
+<div id="duplicateResults" class="result">Run the checks to see results.</div>
+
+<h3>2. Missing Values</h3>
+<p class="note">Counts empty cells in each column.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Column</th><th>Missing cells</th></tr></thead>
+<tbody id="missingResults"></tbody>
+</table>
+</div>
+
+<h3>3. Invalid Values</h3>
+<p class="note">Checks values against their suggested data type. These are possible errors, not guaranteed errors.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Column</th><th>Expected type</th><th>Invalid count</th><th>Examples</th></tr></thead>
+<tbody id="invalidResults"></tbody>
+</table>
+</div>
+
+<h3>4. Conflicting IDs</h3>
+<p class="note">Choose an ID column and another column to check whether the same ID is associated with different values.</p>
+
+<label>ID column</label>
+<select id="idColumn"><option value="">Choose ID column</option></select>
+
+<label>Column to compare</label>
+<select id="compareColumn"><option value="">Choose comparison column</option></select>
+
+<button id="checkIDs">Check ID Conflicts</button>
+<div id="idResults" class="result">Choose two columns to check for conflicts.</div>
+
+<p class="note">Repeated IDs alone are not necessarily errors. This check flags IDs linked to more than one distinct comparison value.</p>
+</div>
+
+<div class="card">
+<h2>Dataset Records</h2>
+<p id="resultMessage" class="note"></p>
+<div class="table-wrap">
+<table>
+<thead id="previewHead"></thead>
+<tbody id="previewBody"></tbody>
+</table>
+</div>
+<p class="note">Showing up to 100 matching records.</p>
 </div>
 
 </div>
@@ -187,279 +155,255 @@ th {
 <script>
 let headers = [];
 let allRows = [];
-let delimiter = ",";
 
 function parseDelimited(text, separator) {
-  const rows = [];
-  let row = [];
-  let cell = "";
-  let insideQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    const next = text[i + 1];
-
-    if (char === '"' && insideQuotes && next === '"') {
-      cell += '"';
-      i++;
-    } else if (char === '"') {
-      insideQuotes = !insideQuotes;
-    } else if (char === separator && !insideQuotes) {
-      row.push(cell);
-      cell = "";
-    } else if ((char === "\n" || char === "\r") && !insideQuotes) {
-      if (char === "\r" && next === "\n") i++;
-      row.push(cell);
-      if (row.some(value => value.trim() !== "")) rows.push(row);
-      row = [];
-      cell = "";
-    } else {
-      cell += char;
-    }
-  }
-
-  row.push(cell);
-  if (row.some(value => value.trim() !== "")) rows.push(row);
-  return rows;
+ const rows=[];
+ let row=[],cell="",quotes=false;
+ for(let i=0;i<text.length;i++){
+  const c=text[i],next=text[i+1];
+  if(c==='"' && quotes && next==='"'){cell+='"';i++}
+  else if(c==='"')quotes=!quotes;
+  else if(c===separator&&!quotes){row.push(cell);cell=""}
+  else if((c==="\n"||c==="\r")&&!quotes){
+   if(c==="\r"&&next==="\n")i++;
+   row.push(cell);
+   if(row.some(v=>v.trim()!==""))rows.push(row);
+   row=[];cell="";
+  } else cell+=c;
+ }
+ row.push(cell);
+ if(row.some(v=>v.trim()!==""))rows.push(row);
+ return rows;
 }
 
-function detectDelimiter(text) {
-  const firstLine = text.split(/\r?\n/)[0] || "";
-  let commas = 0;
-  let tabs = 0;
-  let quotes = false;
-
-  for (let i = 0; i < firstLine.length; i++) {
-    if (firstLine[i] === '"') quotes = !quotes;
-    if (!quotes && firstLine[i] === ",") commas++;
-    if (!quotes && firstLine[i] === "\t") tabs++;
-  }
-
-  return tabs > commas ? "\t" : ",";
+function detectDelimiter(text){
+ const line=text.split(/\r?\n/)[0]||"";
+ let commas=0,tabs=0,quotes=false;
+ for(const c of line){
+  if(c==='"')quotes=!quotes;
+  if(!quotes&&c===",")commas++;
+  if(!quotes&&c==="\t")tabs++;
+ }
+ return tabs>commas?"\t":",";
 }
 
-function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
+function suggestType(values){
+ const clean=values.filter(v=>v.trim()!=="");
+ if(!clean.length)return "Unknown";
+ if(clean.every(v=>/^(true|false)$/i.test(v.trim())))return "Boolean";
+ if(clean.every(v=>v.trim()!==""&&!isNaN(Number(v))))return "Number";
+ if(clean.every(v=>!isNaN(Date.parse(v))&&/[-/]/.test(v)))return "Date";
+ return "Text";
 }
 
-function suggestType(values) {
-  const clean = values.filter(v => v.trim() !== "");
-  if (!clean.length) return "Unknown";
-
-  if (clean.every(v => /^(true|false)$/i.test(v.trim()))) {
-    return "Boolean";
-  }
-
-  if (clean.every(v => !isNaN(Number(v)) && v.trim() !== "")) {
-    return "Number";
-  }
-
-  if (clean.every(v => !isNaN(Date.parse(v)) && /[-/]/.test(v))) {
-    return "Date";
-  }
-
-  return "Text";
+function escapeHTML(v){
+ return String(v).replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ })[c]);
 }
 
-document.getElementById("fileInput").addEventListener("change", function(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-
-  reader.onload = function(e) {
-    try {
-      const text = e.target.result.replace(/^\uFEFF/, "");
-      delimiter = detectDelimiter(text);
-      const parsed = parseDelimited(text, delimiter);
-
-      if (parsed.length < 2) {
-        alert("This file does not contain enough data.");
-        return;
-      }
-
-      headers = parsed[0].map((h, i) => h.trim() || "Column " + (i + 1));
-      allRows = parsed.slice(1).map(row =>
-        headers.map((_, i) => row[i] ?? "")
-      );
-
-      document.getElementById("fileStatus").textContent =
-        "Loaded: " + file.name;
-
-      document.getElementById("analysisArea").style.display = "block";
-
-      showOverview();
-      setupControls();
-      updateResults();
-
-    } catch (error) {
-      alert("Could not read this file. Please check that it is a valid CSV or TSV.");
-    }
-  };
-
-  reader.readAsText(file);
+document.getElementById("fileInput").addEventListener("change",function(e){
+ const file=e.target.files[0];
+ if(!file)return;
+ const reader=new FileReader();
+ reader.onload=function(event){
+  try{
+   const text=event.target.result.replace(/^\uFEFF/,"");
+   const parsed=parseDelimited(text,detectDelimiter(text));
+   if(parsed.length<2){alert("This file does not contain enough data.");return}
+   headers=parsed[0].map((h,i)=>h.trim()||"Column "+(i+1));
+   allRows=parsed.slice(1).map(r=>headers.map((_,i)=>r[i]??""));
+   document.getElementById("fileStatus").textContent="Loaded: "+file.name;
+   document.getElementById("analysisArea").style.display="block";
+   showOverview();
+   setupControls();
+   updateResults();
+   resetQuality();
+  }catch(err){alert("Could not read this file.")}
+ };
+ reader.readAsText(file);
 });
 
-function showOverview() {
-  document.getElementById("rowCount").textContent = allRows.length;
-  document.getElementById("columnCount").textContent = headers.length;
-
-  const body = document.getElementById("columnInfo");
-  body.innerHTML = "";
-
-  headers.forEach((header, index) => {
-    const values = allRows.map(row => row[index] ?? "");
-    const missing = values.filter(v => v.trim() === "").length;
-    const type = suggestType(values);
-
-    body.innerHTML += `
-      <tr>
-        <td>${escapeHTML(header)}</td>
-        <td>${type}</td>
-        <td>${missing}</td>
-      </tr>`;
-  });
+function showOverview(){
+ document.getElementById("rowCount").textContent=allRows.length;
+ document.getElementById("columnCount").textContent=headers.length;
+ const body=document.getElementById("columnInfo");
+ body.innerHTML="";
+ headers.forEach((h,i)=>{
+  const vals=allRows.map(r=>r[i]??"");
+  const missing=vals.filter(v=>v.trim()==="").length;
+  body.innerHTML+=`<tr><td>${escapeHTML(h)}</td><td>${suggestType(vals)}</td><td>${missing}</td></tr>`;
+ });
 }
 
-function setupControls() {
-  const sort = document.getElementById("sortColumn");
-  const filter = document.getElementById("filterColumn");
-
-  sort.innerHTML = '<option value="">Choose a column</option>';
-  filter.innerHTML = '<option value="">Choose a column</option>';
-
-  headers.forEach((header, index) => {
-    const option1 = document.createElement("option");
-    option1.value = index;
-    option1.textContent = header;
-    sort.appendChild(option1);
-
-    const option2 = document.createElement("option");
-    option2.value = index;
-    option2.textContent = header;
-    filter.appendChild(option2);
-  });
-
-  updateFilterValues();
+function fillColumnSelect(id,firstLabel){
+ const el=document.getElementById(id);
+ el.innerHTML=`<option value="">${firstLabel}</option>`;
+ headers.forEach((h,i)=>{
+  const op=document.createElement("option");
+  op.value=i;op.textContent=h;el.appendChild(op);
+ });
 }
 
-function updateFilterValues() {
-  const column = document.getElementById("filterColumn").value;
-  const valueSelect = document.getElementById("filterValue");
-  const previousValue = valueSelect.value;
-
-  valueSelect.innerHTML = '<option value="">All values</option>';
-
-  if (column === "") return;
-
-  const values = [...new Set(
-    allRows.map(row => row[Number(column)] ?? "")
-  )].sort((a, b) => a.localeCompare(b));
-
-  values.forEach(value => {
-    const option = document.createElement("option");
-    option.value = value;
-    option.textContent = value === "" ? "(Blank)" : value;
-    valueSelect.appendChild(option);
-  });
-
-  if (values.includes(previousValue)) {
-    valueSelect.value = previousValue;
-  }
+function setupControls(){
+ fillColumnSelect("sortColumn","Choose a column");
+ fillColumnSelect("filterColumn","Choose a column");
+ fillColumnSelect("idColumn","Choose ID column");
+ fillColumnSelect("compareColumn","Choose comparison column");
+ updateFilterValues();
 }
 
-function updateResults() {
-  const search = document.getElementById("searchInput").value.toLowerCase();
-  const sortColumn = document.getElementById("sortColumn").value;
-  const sortOrder = document.getElementById("sortOrder").value;
-  const filterColumn = document.getElementById("filterColumn").value;
-  const filterValue = document.getElementById("filterValue").value;
-
-  let results = allRows.filter(row => {
-    const matchesSearch = row.some(value =>
-      String(value).toLowerCase().includes(search)
-    );
-
-    const matchesFilter = filterColumn === "" ||
-      filterValue === "" ||
-      (row[Number(filterColumn)] ?? "") === filterValue;
-
-    return matchesSearch && matchesFilter;
-  });
-
-  if (sortColumn !== "") {
-    const index = Number(sortColumn);
-
-    results.sort((a, b) => {
-      const first = a[index] ?? "";
-      const second = b[index] ?? "";
-
-      const firstNumber = Number(first);
-      const secondNumber = Number(second);
-
-      let comparison;
-
-      if (first.trim() !== "" && second.trim() !== "" &&
-          !isNaN(firstNumber) && !isNaN(secondNumber)) {
-        comparison = firstNumber - secondNumber;
-      } else {
-        comparison = first.localeCompare(second, undefined, {
-          numeric: true,
-          sensitivity: "base"
-        });
-      }
-
-      return sortOrder === "asc" ? comparison : -comparison;
-    });
-  }
-
-  document.getElementById("shownCount").textContent = results.length;
-  document.getElementById("resultMessage").textContent =
-    "Found " + results.length + " matching records.";
-
-  document.getElementById("previewHead").innerHTML =
-    "<tr>" + headers.map(h => "<th>" + escapeHTML(h) + "</th>").join("") + "</tr>";
-
-  const body = document.getElementById("previewBody");
-  body.innerHTML = "";
-
-  results.slice(0, 100).forEach(row => {
-    const tr = document.createElement("tr");
-
-    row.forEach(value => {
-      const td = document.createElement("td");
-      td.textContent = value;
-      tr.appendChild(td);
-    });
-
-    body.appendChild(tr);
-  });
+function updateFilterValues(){
+ const col=document.getElementById("filterColumn").value;
+ const sel=document.getElementById("filterValue");
+ sel.innerHTML='<option value="">All values</option>';
+ if(col==="")return;
+ const values=[...new Set(allRows.map(r=>r[Number(col)]??""))].sort();
+ values.forEach(v=>{
+  const op=document.createElement("option");
+  op.value=v;op.textContent=v===""?"(Blank)":v;
+  sel.appendChild(op);
+ });
 }
 
-document.getElementById("searchInput").addEventListener("input", updateResults);
-document.getElementById("sortColumn").addEventListener("change", updateResults);
-document.getElementById("sortOrder").addEventListener("change", updateResults);
+function updateResults(){
+ const search=document.getElementById("searchInput").value.toLowerCase();
+ const sc=document.getElementById("sortColumn").value;
+ const order=document.getElementById("sortOrder").value;
+ const fc=document.getElementById("filterColumn").value;
+ const fv=document.getElementById("filterValue").value;
 
-document.getElementById("filterColumn").addEventListener("change", function() {
-  updateFilterValues();
-  updateResults();
+ let results=allRows.filter(r=>{
+  const found=r.some(v=>String(v).toLowerCase().includes(search));
+  const filtered=fc===""||fv===""||(r[Number(fc)]??"")===fv;
+  return found&&filtered;
+ });
+
+ if(sc!==""){
+  const i=Number(sc);
+  results.sort((a,b)=>{
+   const x=a[i]??"",y=b[i]??"";
+   let n;
+   if(x.trim()!==""&&y.trim()!==""&&!isNaN(Number(x))&&!isNaN(Number(y)))n=Number(x)-Number(y);
+   else n=x.localeCompare(y,undefined,{numeric:true,sensitivity:"base"});
+   return order==="asc"?n:-n;
+  });
+ }
+
+ document.getElementById("shownCount").textContent=results.length;
+ document.getElementById("resultMessage").textContent="Found "+results.length+" matching records.";
+ document.getElementById("previewHead").innerHTML="<tr>"+headers.map(h=>"<th>"+escapeHTML(h)+"</th>").join("")+"</tr>";
+ const body=document.getElementById("previewBody");
+ body.innerHTML="";
+ results.slice(0,100).forEach(r=>{
+  const tr=document.createElement("tr");
+  r.forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});
+  body.appendChild(tr);
+ });
+}
+
+document.getElementById("searchInput").addEventListener("input",updateResults);
+document.getElementById("sortColumn").addEventListener("change",updateResults);
+document.getElementById("sortOrder").addEventListener("change",updateResults);
+document.getElementById("filterColumn").addEventListener("change",()=>{updateFilterValues();updateResults()});
+document.getElementById("filterValue").addEventListener("change",updateResults);
+document.getElementById("resetButton").addEventListener("click",()=>{
+ document.getElementById("searchInput").value="";
+ document.getElementById("sortColumn").value="";
+ document.getElementById("sortOrder").value="asc";
+ document.getElementById("filterColumn").value="";
+ updateFilterValues();updateResults();
 });
 
-document.getElementById("filterValue").addEventListener("change", updateResults);
+function resetQuality(){
+ ["duplicateCount","missingCount","invalidCount","conflictCount"].forEach(id=>{
+  document.getElementById(id).textContent="—";
+ });
+ document.getElementById("duplicateResults").textContent="Run the checks to see results.";
+ document.getElementById("missingResults").innerHTML="";
+ document.getElementById("invalidResults").innerHTML="";
+ document.getElementById("idResults").textContent="Choose two columns to check for conflicts.";
+}
 
-document.getElementById("resetButton").addEventListener("click", function() {
-  document.getElementById("searchInput").value = "";
-  document.getElementById("sortColumn").value = "";
-  document.getElementById("sortOrder").value = "asc";
-  document.getElementById("filterColumn").value = "";
-  updateFilterValues();
-  updateResults();
+function runQualityChecks(){
+ // Duplicate complete rows
+ const seen=new Set();
+ let duplicates=0;
+ allRows.forEach(row=>{
+  const key=JSON.stringify(row);
+  if(seen.has(key))duplicates++;
+  else seen.add(key);
+ });
+ document.getElementById("duplicateCount").textContent=duplicates;
+ document.getElementById("duplicateResults").textContent=
+  duplicates+" repeated row(s) found. Each repeated copy after the first is counted.";
+
+ // Missing cells
+ let totalMissing=0;
+ const missingBody=document.getElementById("missingResults");
+ missingBody.innerHTML="";
+ headers.forEach((h,i)=>{
+  const count=allRows.filter(r=>(r[i]??"").trim()==="").length;
+  totalMissing+=count;
+  missingBody.innerHTML+=`<tr><td>${escapeHTML(h)}</td><td>${count}</td></tr>`;
+ });
+ document.getElementById("missingCount").textContent=totalMissing;
+
+ // Type-based invalid values
+ let totalInvalid=0;
+ const invalidBody=document.getElementById("invalidResults");
+ invalidBody.innerHTML="";
+ headers.forEach((h,i)=>{
+  const vals=allRows.map(r=>r[i]??"").filter(v=>v.trim()!=="");
+  const type=suggestType(vals);
+  let bad=[];
+  if(type==="Number")bad=vals.filter(v=>isNaN(Number(v)));
+  if(type==="Boolean")bad=vals.filter(v=>!/^(true|false)$/i.test(v.trim()));
+  if(type==="Date")bad=vals.filter(v=>isNaN(Date.parse(v))||!/[-/]/.test(v));
+  totalInvalid+=bad.length;
+  const examples=[...new Set(bad)].slice(0,3).join(", ");
+  invalidBody.innerHTML+=`<tr><td>${escapeHTML(h)}</td><td>${type}</td><td>${bad.length}</td><td>${escapeHTML(examples||"—")}</td></tr>`;
+ });
+ document.getElementById("invalidCount").textContent=totalInvalid;
+ document.getElementById("conflictCount").textContent="Not checked";
+}
+
+document.getElementById("runChecks").addEventListener("click",runQualityChecks);
+
+document.getElementById("checkIDs").addEventListener("click",()=>{
+ const idCol=document.getElementById("idColumn").value;
+ const compareCol=document.getElementById("compareColumn").value;
+ const output=document.getElementById("idResults");
+ if(idCol===""||compareCol===""){
+  output.textContent="Please choose both an ID column and a comparison column.";
+  return;
+ }
+ if(idCol===compareCol){
+  output.textContent="Choose two different columns.";
+  return;
+ }
+
+ const groups=new Map();
+ allRows.forEach(row=>{
+  const id=(row[Number(idCol)]??"").trim();
+  const value=(row[Number(compareCol)]??"").trim();
+  if(id==="")return;
+  if(!groups.has(id))groups.set(id,new Set());
+  groups.get(id).add(value);
+ });
+
+ const conflicts=[...groups.entries()].filter(([id,values])=>values.size>1);
+ document.getElementById("conflictCount").textContent=conflicts.length;
+
+ if(conflicts.length===0){
+  output.textContent="No conflicts found between "+headers[Number(idCol)]+" and "+headers[Number(compareCol)]+".";
+ }else{
+  output.innerHTML="<strong>"+conflicts.length+" conflicting ID(s) found:</strong><ul>"+
+   conflicts.slice(0,30).map(([id,values])=>
+    "<li>ID "+escapeHTML(id)+" has different values: "+
+    [...values].map(escapeHTML).join(", ")+"</li>"
+   ).join("")+"</ul>";
+ }
 });
 </script>
 </body>

@@ -4,118 +4,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Detectives - CSV and TSV Analyzer</title>
-
+<title>Data Detectives - CSV Analyzer</title>
 <style>
-* {
-  box-sizing: border-box;
-}
-
+* { box-sizing: border-box; }
 body {
   margin: 0;
-  padding: 20px;
+  padding: 18px;
   font-family: Arial, sans-serif;
-  background: #f2f5fa;
-  color: #243047;
+  background: #f3f5fa;
+  color: #20243a;
 }
-
 .container {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: auto;
 }
-
-header {
-  background: #172b4d;
-  color: white;
-  padding: 25px;
-  border-radius: 14px;
-  margin-bottom: 20px;
-}
-
-header p {
-  color: #d5dfef;
-}
-
-.panel {
+h1 { color: #343c78; }
+h2 { color: #343c78; margin-top: 28px; }
+.card {
   background: white;
-  padding: 20px;
+  padding: 18px;
+  margin: 16px 0;
   border-radius: 12px;
-  margin-bottom: 18px;
-  box-shadow: 0 2px 8px #00000010;
+  box-shadow: 0 2px 8px #0000000c;
 }
-
-.upload {
-  display: block;
-  padding: 20px;
-  border: 2px dashed #8295b5;
-  border-radius: 10px;
-  text-align: center;
+input, select, button {
+  width: 100%;
+  padding: 12px;
+  margin: 7px 0;
+  border: 1px solid #ccd1df;
+  border-radius: 7px;
+  font-size: 15px;
+}
+button {
+  background: #454f9b;
+  color: white;
+  border: none;
   cursor: pointer;
 }
-
-input[type=file] {
-  max-width: 100%;
-  margin-top: 12px;
-}
-
+button:hover { background: #303a80; }
 .stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-top: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
 }
-
 .stat {
-  background: #edf3fc;
-  padding: 18px;
-  border-radius: 10px;
+  background: #eef0ff;
+  padding: 14px;
+  border-radius: 9px;
 }
-
 .stat strong {
   display: block;
-  font-size: 27px;
-  color: #2455a4;
+  font-size: 23px;
+  color: #343c78;
+  margin-top: 5px;
 }
-
-.stat span {
-  font-size: 13px;
-}
-
 .table-wrap {
   overflow-x: auto;
-  margin-top: 12px;
-}
-
-table {
   width: 100%;
-  border-collapse: collapse;
-  min-width: 450px;
 }
-
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 500px;
+  background: white;
+}
 th, td {
-  padding: 11px;
-  border-bottom: 1px solid #e3e8f0;
+  border: 1px solid #ddd;
+  padding: 10px;
   text-align: left;
   font-size: 13px;
 }
-
 th {
-  background: #edf3fc;
+  background: #454f9b;
+  color: white;
 }
-
-.note {
-  color: #66758b;
-  font-size: 13px;
-}
-
-@media(max-width: 500px) {
-  body {
-    padding: 12px;
-  }
-
-  header, .panel {
-    padding: 16px;
-  }
+.note { color: #62677b; font-size: 13px; }
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
 }
 </style>
 </head>
@@ -123,125 +90,127 @@ th {
 <body>
 <div class="container">
 
-<header>
-  <h1>🔎 Data Detectives</h1>
-  <h2>Annual Resource Review</h2>
-  <p>CSV and TSV Data Analyzer</p>
-</header>
+<h1>🚀 Data Detectives</h1>
+<p>CSV Data Analysis Tool — T1 and T2</p>
 
-<section class="panel">
-  <h2>1. Upload Dataset</h2>
+<div class="card">
+  <h2>T1: Upload Your Dataset</h2>
+  <p>Select a CSV or TSV file from your device.</p>
+  <input type="file" id="fileInput" accept=".csv,.tsv,text/csv,text/tab-separated-values">
+  <p id="fileStatus" class="note">No file uploaded yet.</p>
+</div>
 
-  <label class="upload">
-    <strong>Select a CSV or TSV file</strong>
-    <p class="note">
-      Supported formats: .csv and .tsv
-    </p>
-    <input
-      type="file"
-      id="dataFile"
-      accept=".csv,.tsv,text/csv,text/tab-separated-values">
-  </label>
+<div id="analysisArea" style="display:none">
 
-  <p id="status" class="note">
-    No dataset uploaded yet.
-  </p>
-</section>
-
-<section class="panel">
-  <h2>2. Dataset Overview</h2>
-
+<div class="card">
+  <h2>Dataset Overview</h2>
   <div class="stats">
-    <div class="stat">
-      <strong id="rowCount">0</strong>
-      <span>Data Records</span>
-    </div>
-
-    <div class="stat">
-      <strong id="columnCount">0</strong>
-      <span>Columns</span>
-    </div>
+    <div class="stat">Rows<strong id="rowCount">0</strong></div>
+    <div class="stat">Columns<strong id="columnCount">0</strong></div>
+    <div class="stat">Displayed<strong id="shownCount">0</strong></div>
   </div>
-</section>
+</div>
 
-<section class="panel">
-  <h2>3. Suggested Data Types</h2>
-
+<div class="card">
+  <h2>Column Information</h2>
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th>Column Name</th>
+          <th>Column</th>
           <th>Suggested Type</th>
           <th>Missing Values</th>
         </tr>
       </thead>
-
-      <tbody id="typeTable">
-        <tr>
-          <td colspan="3">Upload a dataset to begin.</td>
-        </tr>
-      </tbody>
+      <tbody id="columnInfo"></tbody>
     </table>
   </div>
-</section>
+</div>
 
-<section class="panel">
-  <h2>4. Dataset Preview</h2>
+<div class="card">
+  <h2>T2: Search, Sort and Filter</h2>
 
-  <p class="note" id="previewNote">
-    Your uploaded records will appear here.
-  </p>
+  <label for="searchInput"><strong>1. Search records</strong></label>
+  <input id="searchInput" type="text"
+         placeholder="Type a word or value to search...">
 
+  <div class="controls">
+    <div>
+      <label for="sortColumn"><strong>2. Sort by column</strong></label>
+      <select id="sortColumn">
+        <option value="">Choose a column</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="sortOrder"><strong>Sort order</strong></label>
+      <select id="sortOrder">
+        <option value="asc">Ascending (A–Z / smallest first)</option>
+        <option value="desc">Descending (Z–A / largest first)</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="filterColumn"><strong>3. Filter column</strong></label>
+      <select id="filterColumn">
+        <option value="">Choose a column</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="filterValue"><strong>Filter value</strong></label>
+      <select id="filterValue">
+        <option value="">All values</option>
+      </select>
+    </div>
+  </div>
+
+  <button id="resetButton" type="button">Reset Search, Sort and Filter</button>
+  <p class="note">Search works across all columns. Sorting and filtering can be used together.</p>
+</div>
+
+<div class="card">
+  <h2>Dataset Records</h2>
+  <p id="resultMessage" class="note"></p>
   <div class="table-wrap">
     <table>
       <thead id="previewHead"></thead>
       <tbody id="previewBody"></tbody>
     </table>
   </div>
-</section>
+  <p class="note">Showing up to 100 matching records.</p>
+</div>
 
+</div>
 </div>
 
 <script>
-const fileInput = document.getElementById("dataFile");
+let headers = [];
+let allRows = [];
+let delimiter = ",";
 
-// Read CSV or TSV data
-function parseDelimited(text, delimiter) {
+function parseDelimited(text, separator) {
   const rows = [];
   let row = [];
   let cell = "";
-  let quoted = false;
-
-  text = text.replace(/^\uFEFF/, "");
+  let insideQuotes = false;
 
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
+    const next = text[i + 1];
 
-    if (char === '"') {
-      if (quoted && text[i + 1] === '"') {
-        cell += '"';
-        i++;
-      } else {
-        quoted = !quoted;
-      }
-    } else if (char === delimiter && !quoted) {
+    if (char === '"' && insideQuotes && next === '"') {
+      cell += '"';
+      i++;
+    } else if (char === '"') {
+      insideQuotes = !insideQuotes;
+    } else if (char === separator && !insideQuotes) {
       row.push(cell);
       cell = "";
-    } else if (
-      (char === "\n" || char === "\r") &&
-      !quoted
-    ) {
-      if (char === "\r" && text[i + 1] === "\n") {
-        i++;
-      }
-
+    } else if ((char === "\n" || char === "\r") && !insideQuotes) {
+      if (char === "\r" && next === "\n") i++;
       row.push(cell);
-
-      if (row.some(value => value.trim() !== "")) {
-        rows.push(row);
-      }
-
+      if (row.some(value => value.trim() !== "")) rows.push(row);
       row = [];
       cell = "";
     } else {
@@ -250,164 +219,248 @@ function parseDelimited(text, delimiter) {
   }
 
   row.push(cell);
-
-  if (row.some(value => value.trim() !== "")) {
-    rows.push(row);
-  }
-
+  if (row.some(value => value.trim() !== "")) rows.push(row);
   return rows;
 }
 
-// Suggest a data type for each column
-function suggestType(values) {
-  const data = values.filter(
-    value => value.trim() !== ""
-  );
+function detectDelimiter(text) {
+  const firstLine = text.split(/\r?\n/)[0] || "";
+  let commas = 0;
+  let tabs = 0;
+  let quotes = false;
 
-  if (data.length === 0) {
-    return "Unknown";
+  for (let i = 0; i < firstLine.length; i++) {
+    if (firstLine[i] === '"') quotes = !quotes;
+    if (!quotes && firstLine[i] === ",") commas++;
+    if (!quotes && firstLine[i] === "\t") tabs++;
   }
 
-  if (data.every(value =>
-    /^(true|false)$/i.test(value.trim())
-  )) {
+  return tabs > commas ? "\t" : ",";
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function suggestType(values) {
+  const clean = values.filter(v => v.trim() !== "");
+  if (!clean.length) return "Unknown";
+
+  if (clean.every(v => /^(true|false)$/i.test(v.trim()))) {
     return "Boolean";
   }
 
-  if (data.every(value =>
-    /^[-+]?\d+(\.\d+)?$/.test(value.trim())
-  )) {
+  if (clean.every(v => !isNaN(Number(v)) && v.trim() !== "")) {
     return "Number";
   }
 
-  if (data.every(value =>
-    !isNaN(Date.parse(value.trim())) &&
-    /[-/]/.test(value.trim())
-  )) {
+  if (clean.every(v => !isNaN(Date.parse(v)) && /[-/]/.test(v))) {
     return "Date";
   }
 
   return "Text";
 }
 
-// Upload and analyze dataset
-fileInput.addEventListener("change", async function() {
-  const file = fileInput.files[0];
-
+document.getElementById("fileInput").addEventListener("change", function(event) {
+  const file = event.target.files[0];
   if (!file) return;
 
-  const extension = file.name.toLowerCase();
+  const reader = new FileReader();
 
-  if (!extension.endsWith(".csv") &&
-      !extension.endsWith(".tsv")) {
-    document.getElementById("status").textContent =
-      "Please select a CSV or TSV file.";
-    return;
-  }
+  reader.onload = function(e) {
+    try {
+      const text = e.target.result.replace(/^\uFEFF/, "");
+      delimiter = detectDelimiter(text);
+      const parsed = parseDelimited(text, delimiter);
 
-  try {
-    const text = await file.text();
+      if (parsed.length < 2) {
+        alert("This file does not contain enough data.");
+        return;
+      }
 
-    // Detect delimiter from file extension
-    const delimiter = extension.endsWith(".tsv")
-      ? "\t"
-      : ",";
-
-    const rows = parseDelimited(text, delimiter);
-
-    if (rows.length < 1) {
-      throw new Error("The file is empty.");
-    }
-
-    const headers = rows[0].map(
-      header => header.trim()
-    );
-
-    const records = rows.slice(1).filter(
-      row => row.some(value => value.trim() !== "")
-    );
-
-    // Dataset overview
-    document.getElementById("status").textContent =
-      "Successfully loaded: " + file.name;
-
-    document.getElementById("rowCount").textContent =
-      records.length.toLocaleString();
-
-    document.getElementById("columnCount").textContent =
-      headers.length;
-
-    // Suggested data types and missing values
-    const typeTable = document.getElementById("typeTable");
-    typeTable.innerHTML = "";
-
-    headers.forEach((header, index) => {
-      const values = records.map(
-        row => row[index] || ""
+      headers = parsed[0].map((h, i) => h.trim() || "Column " + (i + 1));
+      allRows = parsed.slice(1).map(row =>
+        headers.map((_, i) => row[i] ?? "")
       );
 
-      const missing = values.filter(
-        value => value.trim() === ""
-      ).length;
+      document.getElementById("fileStatus").textContent =
+        "Loaded: " + file.name;
 
-      const tr = document.createElement("tr");
+      document.getElementById("analysisArea").style.display = "block";
 
-      [
-        header,
-        suggestType(values),
-        missing
-      ].forEach(value => {
-        const td = document.createElement("td");
-        td.textContent = value;
-        tr.appendChild(td);
-      });
+      showOverview();
+      setupControls();
+      updateResults();
 
-      typeTable.appendChild(tr);
-    });
+    } catch (error) {
+      alert("Could not read this file. Please check that it is a valid CSV or TSV.");
+    }
+  };
 
-    // Preview first 100 records
-    const previewHead =
-      document.getElementById("previewHead");
+  reader.readAsText(file);
+});
 
-    const previewBody =
-      document.getElementById("previewBody");
+function showOverview() {
+  document.getElementById("rowCount").textContent = allRows.length;
+  document.getElementById("columnCount").textContent = headers.length;
 
-    previewHead.innerHTML = "";
-    previewBody.innerHTML = "";
+  const body = document.getElementById("columnInfo");
+  body.innerHTML = "";
 
-    const headerRow = document.createElement("tr");
+  headers.forEach((header, index) => {
+    const values = allRows.map(row => row[index] ?? "");
+    const missing = values.filter(v => v.trim() === "").length;
+    const type = suggestType(values);
 
-    headers.forEach(header => {
-      const th = document.createElement("th");
-      th.textContent = header;
-      headerRow.appendChild(th);
-    });
+    body.innerHTML += `
+      <tr>
+        <td>${escapeHTML(header)}</td>
+        <td>${type}</td>
+        <td>${missing}</td>
+      </tr>`;
+  });
+}
 
-    previewHead.appendChild(headerRow);
+function setupControls() {
+  const sort = document.getElementById("sortColumn");
+  const filter = document.getElementById("filterColumn");
 
-    records.slice(0, 100).forEach(record => {
-      const tr = document.createElement("tr");
+  sort.innerHTML = '<option value="">Choose a column</option>';
+  filter.innerHTML = '<option value="">Choose a column</option>';
 
-      headers.forEach((_, index) => {
-        const td = document.createElement("td");
-        td.textContent = record[index] || "";
-        tr.appendChild(td);
-      });
+  headers.forEach((header, index) => {
+    const option1 = document.createElement("option");
+    option1.value = index;
+    option1.textContent = header;
+    sort.appendChild(option1);
 
-      previewBody.appendChild(tr);
-    });
+    const option2 = document.createElement("option");
+    option2.value = index;
+    option2.textContent = header;
+    filter.appendChild(option2);
+  });
 
-    document.getElementById("previewNote").textContent =
-      "Showing up to 100 of " +
-      records.length +
-      " records. All records were counted.";
+  updateFilterValues();
+}
 
-  } catch (error) {
-    document.getElementById("status").textContent =
-      "Error reading file: " + error.message;
+function updateFilterValues() {
+  const column = document.getElementById("filterColumn").value;
+  const valueSelect = document.getElementById("filterValue");
+  const previousValue = valueSelect.value;
+
+  valueSelect.innerHTML = '<option value="">All values</option>';
+
+  if (column === "") return;
+
+  const values = [...new Set(
+    allRows.map(row => row[Number(column)] ?? "")
+  )].sort((a, b) => a.localeCompare(b));
+
+  values.forEach(value => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value === "" ? "(Blank)" : value;
+    valueSelect.appendChild(option);
+  });
+
+  if (values.includes(previousValue)) {
+    valueSelect.value = previousValue;
   }
+}
+
+function updateResults() {
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const sortColumn = document.getElementById("sortColumn").value;
+  const sortOrder = document.getElementById("sortOrder").value;
+  const filterColumn = document.getElementById("filterColumn").value;
+  const filterValue = document.getElementById("filterValue").value;
+
+  let results = allRows.filter(row => {
+    const matchesSearch = row.some(value =>
+      String(value).toLowerCase().includes(search)
+    );
+
+    const matchesFilter = filterColumn === "" ||
+      filterValue === "" ||
+      (row[Number(filterColumn)] ?? "") === filterValue;
+
+    return matchesSearch && matchesFilter;
+  });
+
+  if (sortColumn !== "") {
+    const index = Number(sortColumn);
+
+    results.sort((a, b) => {
+      const first = a[index] ?? "";
+      const second = b[index] ?? "";
+
+      const firstNumber = Number(first);
+      const secondNumber = Number(second);
+
+      let comparison;
+
+      if (first.trim() !== "" && second.trim() !== "" &&
+          !isNaN(firstNumber) && !isNaN(secondNumber)) {
+        comparison = firstNumber - secondNumber;
+      } else {
+        comparison = first.localeCompare(second, undefined, {
+          numeric: true,
+          sensitivity: "base"
+        });
+      }
+
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+  }
+
+  document.getElementById("shownCount").textContent = results.length;
+  document.getElementById("resultMessage").textContent =
+    "Found " + results.length + " matching records.";
+
+  document.getElementById("previewHead").innerHTML =
+    "<tr>" + headers.map(h => "<th>" + escapeHTML(h) + "</th>").join("") + "</tr>";
+
+  const body = document.getElementById("previewBody");
+  body.innerHTML = "";
+
+  results.slice(0, 100).forEach(row => {
+    const tr = document.createElement("tr");
+
+    row.forEach(value => {
+      const td = document.createElement("td");
+      td.textContent = value;
+      tr.appendChild(td);
+    });
+
+    body.appendChild(tr);
+  });
+}
+
+document.getElementById("searchInput").addEventListener("input", updateResults);
+document.getElementById("sortColumn").addEventListener("change", updateResults);
+document.getElementById("sortOrder").addEventListener("change", updateResults);
+
+document.getElementById("filterColumn").addEventListener("change", function() {
+  updateFilterValues();
+  updateResults();
+});
+
+document.getElementById("filterValue").addEventListener("change", updateResults);
+
+document.getElementById("resetButton").addEventListener("click", function() {
+  document.getElementById("searchInput").value = "";
+  document.getElementById("sortColumn").value = "";
+  document.getElementById("sortOrder").value = "asc";
+  document.getElementById("filterColumn").value = "";
+  updateFilterValues();
+  updateResults();
 });
 </script>
-
 </body>
 </html>
